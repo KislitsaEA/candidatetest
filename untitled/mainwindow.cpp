@@ -69,23 +69,24 @@ void MainWindow::on_pushButton_2_clicked()
     file.open(QIODevice::ReadOnly); //Открытие в режиме чтения
     while(!file.atEnd()){
         QString findString = file.readLine(); //Построчное чтение .json файла и происк нужного типа
-        if (findString.contains(findValue)){
-            matches++; //Если найден, переменная будет равна 1
-        }
-        else if (findString.contains("}") and matches==1){ //Если нужный тип был найден и находится скобка закрытия списка агрументов - выход из цикла
-            break;
-        }
-        else if (((findString.contains("double")) or (findString.contains("int"))) and matches==1){ //Если был найден нужный тип, происходит чтение строк с оффсетом double или int
+        findString.remove(QRegExp("\\s+"));
+        if (findString.contains(findValue))
+            matches++; //Если найден нужный тип, переменная будет равна 1
+        else if (matches>0){
+            if (findString=="}")
+                break; //Если при чтении массива находится одиночный символ } - выход
             auto parts = findString.split(QRegExp("\\W+"), Qt::SkipEmptyParts); //Разбиение строки на слова с отбросом всех символов
-            jsonList.append((new myList));
-            jsonList[k]->key=findKey+"."+parts[0];
-            jsonList[k]->value=QVariant(offset).toString();
-            k++;
-            if (parts[1]=="double") //Преобразование оффсета в число
-                offset+=8;
-            else
-                offset+=4;
-            ui->textBrowser->append(findKey+"."+parts[0]);
+            if (parts.size()>1){ //Если в строке менее 2 подстрок - пропуск строки
+                jsonList.append((new myList));
+                jsonList[k]->key=findKey+"."+parts[0];
+                jsonList[k]->value=QVariant(offset).toString();
+                k++;
+                if (parts[1]=="double") //Преобразование оффсета в число
+                    offset+=8;
+                else
+                    offset+=4;
+                ui->textBrowser->append(findKey+"."+parts[0]);
+            }
        }
    }
 }
