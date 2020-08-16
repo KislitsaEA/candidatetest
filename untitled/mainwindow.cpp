@@ -28,6 +28,16 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+int offset_i(QString offset){ //Преобразование оффсета в число
+    int offset_output=0;
+    if (offset=="double")
+        offset_output+=8;
+    else if (offset=="int")
+        offset_output+=4;
+    else if (offset=="bool")
+        offset_output+=1;
+    return offset_output;
+}
 
 void MainWindow::on_pushButton_clicked()
 {
@@ -49,46 +59,44 @@ void MainWindow::on_pushButton_clicked()
         }
     }
     file.close(); //Закрытие файла
+    ui->pushButton_2->setEnabled(true);
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
     jsonList.clear();
     ui->textBrowser->clear();
-    int matches=0; //переменная для нахождения начала списка аргументов
+    bool matches=0; //переменная для нахождения начала списка аргументов
     int offset=0;
     int k=0;
     QString findValue;
     QString findKey = ui->comboBox->currentText(); //Выбранный в списке тег
-    for (int i=0;i<CSVList.size();i++){ //Поиск в массиве тега и соответствующего ему типа
+    for (int i=0;i<CSVList.size();i++) //Поиск в массиве тега и соответствующего ему типа
         if (CSVList[i]->key==findKey)
             findValue = CSVList[i]->value;
-    }
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open .json file"), "", tr(".json (*.json)")); //Выбор файла .json
     QFile file(fileName);
     file.open(QIODevice::ReadOnly); //Открытие в режиме чтения
     while(!file.atEnd()){
         QString findString = file.readLine(); //Построчное чтение .json файла и происк нужного типа
-        findString.remove(QRegExp("\\s+"));
+        findString.remove(QRegExp("\\s+")); //Удаление из строки всех пробельных символов
         if (findString.contains(findValue))
-            matches++; //Если найден нужный тип, переменная будет равна 1
-        else if (matches>0){
+            matches=1; //Если найден нужный тип, переменная будет равна 1
+        else if (matches){
             if (findString=="}")
                 break; //Если при чтении массива находится одиночный символ } - выход
-            auto parts = findString.split(QRegExp("\\W+"), Qt::SkipEmptyParts); //Разбиение строки на слова с отбросом всех символов
+            auto parts = findString.split(QRegExp("\\W+"), Qt::SkipEmptyParts); //Разбиение строки на слова с отбросом всех символов не слова
             if (parts.size()>1){ //Если в строке менее 2 подстрок - пропуск строки
                 jsonList.append((new myList));
                 jsonList[k]->key=findKey+"."+parts[0];
                 jsonList[k]->value=QVariant(offset).toString();
                 k++;
-                if (parts[1]=="double") //Преобразование оффсета в число
-                    offset+=8;
-                else
-                    offset+=4;
+                offset += offset_i(parts[1]);
                 ui->textBrowser->append(findKey+"."+parts[0]);
             }
-       }
-   }
+        }
+    }
+    ui->pushButton_3->setEnabled(true);
 }
 
 void MainWindow::on_pushButton_3_clicked()
