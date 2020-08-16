@@ -22,6 +22,12 @@ private slots:
 
     void on_pushButton_3_clicked();
 
+    void on_csvOpen_clicked();
+
+    void on_jsonOpen_clicked();
+
+    void on_exportButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
