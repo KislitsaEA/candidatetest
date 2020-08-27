@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <filemanip.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,12 +17,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
-
-    void on_pushButton_2_clicked();
-
-    void on_pushButton_3_clicked();
-
     void on_csvOpen_clicked();
 
     void on_jsonOpen_clicked();
@@ -29,6 +24,9 @@ private slots:
     void on_exportButton_clicked();
 
 private:
+    jsonProcessing* myJSON = new jsonProcessing;
+    csvProcessing* myCSV = new csvProcessing;
+    getXML* myXML = new getXML;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H
