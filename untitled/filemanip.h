@@ -5,6 +5,9 @@
 #include <qfile.h>
 #include <qmap.h>
 #include <qxmlstream.h>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <qjsonarray.h>
 
 class csvJsonContainer
 {

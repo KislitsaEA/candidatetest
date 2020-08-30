@@ -7,6 +7,7 @@
 #include <filemanip.h>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <qjsonarray.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

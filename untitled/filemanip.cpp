@@ -53,41 +53,24 @@ void csvProcessing::csvInit(){
 //***JSON***
 
 void jsonProcessing::jsonFileRead(QString inputFileName, QString inputValue, QString inputKey){
+    int i=0;
     QFile file(inputFileName);
-    int i=0; //Указатель на элемент массива
-    bool matches=0; //Флаг для парсинга json
     file.open(QIODevice::ReadOnly);
+    QJsonDocument doc = QJsonDocument().fromJson(file.readAll());
+    QJsonObject jsonObject = doc.object();
+    QJsonArray typeInfos = jsonObject.value("TypeInfos").toArray();
 
-    while(!file.atEnd()){
-
-        //Построчное чтение .json файла и удаление из строки всех пробельных символов
-        QString findString = file.readLine();
-        findString.remove(QRegExp("\\s+"));
-
-        //Если найден нужный тип, переменная будет равна 1
-        if (findString.contains(inputValue)){
-            matches=1;
-        }
-
-        //Если нужный тип найден, начинается обработка строк
-        else if (matches){
-
-            //Если при чтении строк находится одиночный символ } - выход
-            if (findString=="}"){
-                break;
+    for (auto typeInfo: typeInfos)
+    {
+        const QJsonObject infoObject = typeInfo.toObject();
+        if (infoObject.value("TypeName").toString() == inputValue)
+        {
+            QMap<QString, QVariant> infoObjec1t = infoObject.value("Propertys").toVariant().toMap();
+            for(auto e : infoObjec1t.keys())
+            {
+                jsonProcessing::jsonListAppend(inputKey+"."+e,infoObjec1t.value(e).toString(), i);
+                i++;
             }
-
-            //Разбиение строки на слова с отбросом всех символов не слова
-            auto parts = findString.split(QRegExp("\\W+"), Qt::SkipEmptyParts);
-
-            //Если в строке менее 2 подстрок - пропуск строки
-            if (parts.size()<2){
-                continue;
-            }
-
-            //Заполнение массива и текстбраузера значениями
-            jsonProcessing::jsonListAppend(inputKey+"."+parts[0],parts[1], i);
-            i++;
         }
     }
 }
@@ -96,8 +79,8 @@ void jsonProcessing::jsonListAppend(QString key, QString value, int i){
     csvJsonList.append(new myList);
     csvJsonList[i]->key=key;
     csvJsonList[i]->value=QString::number(offset);
-    i++;
     offset += offsetConvertToInt.value(value);
+    i++;
 }
 
 int jsonProcessing::jsonGetSize(){
