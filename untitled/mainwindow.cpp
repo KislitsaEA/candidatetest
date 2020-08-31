@@ -36,11 +36,7 @@ void MainWindow::on_csvOpen_clicked()
     myCSV->csvInit();
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open .csv file"), "", tr(".csv (*.csv)"));
     myCSV->csvFileRead(fileName);
-
-    for(int i=0;i<myCSV->csvGetSize();i++){
-        ui->comboBox->addItem(myCSV->csvGetKey(i));
-    }
-
+    ui->comboBox->addItems(myCSV->csvGetKey());
     ui->jsonOpen->setEnabled(true);
 }
 
@@ -53,9 +49,8 @@ void MainWindow::on_jsonOpen_clicked()
 
     ui->textBrowser->clear();
 
-    for(int i=0;i<myJSON->jsonGetSize();i++){
-        ui->textBrowser->append(myJSON->jsonGetKey(i));
-
+    for (auto c : myJSON->jsonGetKey()){
+        ui->textBrowser->append(c);
     }
 
     ui->exportButton->setEnabled(true);
@@ -63,7 +58,7 @@ void MainWindow::on_jsonOpen_clicked()
 
 void MainWindow::on_exportButton_clicked()
 {
-    myXML->exportXML(myJSON->csvJsonList);
+    myXML->exportXML(myJSON->jsonContainer);
 
     ui->textBrowser->clear();
     ui->textBrowser->setText("Done!\n"

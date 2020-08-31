@@ -1,7 +1,6 @@
 #include "filemanip.h"
 
 void csvProcessing::csvFileRead(QString inputFileName){
-    int i=0; //Указатель на элемент массива
     QFile file(inputFileName);
     file.open(QIODevice::ReadOnly);
 
@@ -17,103 +16,92 @@ void csvProcessing::csvFileRead(QString inputFileName){
         }
 
         //Заполнение массива
-        csvProcessing::csvListAppend(inputParts[0], inputParts[1], i);
-        i++;
+        csvContainer.insert(inputParts[0], inputParts[1]);
     }
 }
 
-QString csvProcessing::csvGetKey(int i){
-    return (csvJsonList[i]->key);
+//Возврат ключей из контейнера
+QList<QString> csvProcessing::csvGetKey(){
+    return csvContainer.keys();
 }
 
+//Возврат размера контейнера
 int csvProcessing::csvGetSize(){
-    return csvJsonList.size();
+    return csvContainer.size();
 }
 
-void csvProcessing::csvListAppend(QString key, QString value, int i){
-    csvJsonList.append(new myList);
-    csvJsonList[i]->key=key;
-    csvJsonList[i]->value=value;
-    i++;
+//Поиск значения по ключу
+QString csvProcessing::csvFindValue(QString inputKey){
+    return csvContainer.value(inputKey);
 }
 
-QString csvProcessing::csvFindValue(QString inputValue){
-    for (int i=0; i<csvJsonList.size(); i++){
-        if (csvJsonList[i]->key == inputValue){
-            return csvJsonList[i]->value;
-        }
-    }
-    return 0;
-}
-
+//Очистка контейнера
 void csvProcessing::csvInit(){
-    csvJsonList.clear();
+    csvContainer.clear();
 }
 
 //***JSON***
 
 void jsonProcessing::jsonFileRead(QString inputFileName, QString inputValue, QString inputKey){
-    int i=0;
+    int offsetCounter = 0; //Счетчик оффсета
     QFile file(inputFileName);
     file.open(QIODevice::ReadOnly);
+
+    //Чтение файла и преобразование его в контейнер
     QJsonDocument doc = QJsonDocument().fromJson(file.readAll());
     QJsonObject jsonObject = doc.object();
     QJsonArray typeInfos = jsonObject.value("TypeInfos").toArray();
 
+    //Цикл поиска нужного значения и заполнение контейнера
     for (auto typeInfo: typeInfos)
     {
-        const QJsonObject infoObject = typeInfo.toObject();
+        QJsonObject infoObject = typeInfo.toObject();
         if (infoObject.value("TypeName").toString() == inputValue)
         {
             QMap<QString, QVariant> infoObjec1t = infoObject.value("Propertys").toVariant().toMap();
             for(auto e : infoObjec1t.keys())
             {
-                jsonProcessing::jsonListAppend(inputKey+"."+e,infoObjec1t.value(e).toString(), i);
-                i++;
+                jsonContainer.insert(inputKey+"."+e, QString::number(offsetCounter));
+                offsetCounter+=offsetConvertToInt.value(infoObjec1t.value(e).toString());
             }
         }
     }
 }
 
-void jsonProcessing::jsonListAppend(QString key, QString value, int i){
-    csvJsonList.append(new myList);
-    csvJsonList[i]->key=key;
-    csvJsonList[i]->value=QString::number(offset);
-    offset += offsetConvertToInt.value(value);
-    i++;
-}
-
+//Возврат размера контейнера
 int jsonProcessing::jsonGetSize(){
-    return csvJsonList.size();
+    return jsonContainer.size();
 }
 
-QString jsonProcessing::jsonGetKey(int i){
-    return csvJsonList[i]->key;
+
+//Получение ключей
+QList<QString> jsonProcessing::jsonGetKey(){
+    return jsonContainer.keys();
 }
 
+
+//Очистка
 void jsonProcessing::jsonInit(){
-    csvJsonList.clear();
-    offset=0;
+    jsonContainer.clear();
 }
 
 //***XML***
 
-void getXML::exportXML(QList<myList*> myDataList){
+void getXML::exportXML(QMap<QString, QString> myDataList){
     QFile file("output.xml");
     file.open(QIODevice::WriteOnly);
     QXmlStreamWriter XmlWriter(&file);
 
     XmlWriter.writeStartElement("root");
 
-    for(int i=0;i<myDataList.size();i++){
-
+    for(auto e : myDataList.keys()){
             XmlWriter.writeStartElement("item");
             XmlWriter.writeAttribute("Binding","Introduced");
             XmlWriter.writeStartElement("node-path");
-            XmlWriter.writeCharacters(myDataList[i]->key);
+            XmlWriter.writeCharacters(e);
             XmlWriter.writeEndElement();
             XmlWriter.writeStartElement("address");
-            XmlWriter.writeCharacters(myDataList[i]->value);
+            XmlWriter.writeCharacters(myDataList.value(e));
             XmlWriter.writeEndElement();
             XmlWriter.writeEndElement();
         }

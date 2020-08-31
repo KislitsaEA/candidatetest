@@ -9,44 +9,36 @@
 #include <QJsonObject>
 #include <qjsonarray.h>
 
-class csvJsonContainer
-{
-public:
-    struct myList{
-        QString key;
-        QString value;
-    };
-    QList<myList*> csvJsonList;
-};
-
-class csvProcessing : public csvJsonContainer
+class csvProcessing
 {
 public:
     void csvInit(); //Инициализация класса
     void csvFileRead(QString); //Функция чтения csv
     void csvListAppend(QString, QString, int); //Функция добавления значений в массив CSV
     int csvGetSize(); //Функция вывода размера контейнера
-    QString csvGetKey(int); //Функция получения ключа из контейнера
+    QList<QString> csvGetKey(); //Функция получения ключа из контейнера
     QString csvFindValue(QString); //Функция поиска значения в контейнере
+    QMap <QString, QString> csvContainer;
 };
 
-class jsonProcessing : public csvJsonContainer
+class jsonProcessing
 {
 public:
     void jsonInit(); //Инициализация
     void jsonFileRead(QString, QString, QString); //Чтение
     void jsonListAppend(QString, QString, int); //Добавление значений
     int jsonGetSize(); //Размер контейнера
-    QString jsonGetKey(int); //Получение ключа
+    QList <QString> jsonGetKey(); //Получение ключа
+    QMap <QString, QString> jsonContainer;
 private:
     QMap<QString, int> offsetConvertToInt = { {"double", 8}, {"int", 4}, {"bool", 1} }; //Преобразование оффсета в число
     int offset=0; //Переменная для накопления оффсета
 };
 
-class getXML : public csvJsonContainer
+class getXML
 {
 public:
-    void exportXML(QList<myList*> csvJsonList);
+    void exportXML(QMap<QString, QString> csvJsonList);
 };
 
 #endif // CSVREAD_H
