@@ -16,13 +16,17 @@ void csvProcessing::csvFileRead(QString inputFileName){
         }
 
         //Заполнение массива
-        csvContainer.insert(inputParts[0], inputParts[1]);
+        csvContainer.append(qMakePair(inputParts[0], inputParts[1]));
     }
 }
 
 //Возврат ключей из контейнера
 QList<QString> csvProcessing::csvGetKey(){
-    return csvContainer.keys();
+    QList <QString> keys;
+    for (auto a : csvContainer){
+        keys.append(a.first);
+    }
+    return keys;
 }
 
 //Возврат размера контейнера
@@ -32,7 +36,12 @@ int csvProcessing::csvGetSize(){
 
 //Поиск значения по ключу
 QString csvProcessing::csvFindValue(QString inputKey){
-    return csvContainer.value(inputKey);
+    for (auto a : csvContainer){
+        if (a.first == inputKey){
+            return a.second;
+        }
+    }
+    return 0;
 }
 
 //Очистка контейнера
@@ -48,35 +57,36 @@ void jsonProcessing::jsonFileRead(QString inputFileName, QString inputValue, QSt
     file.open(QIODevice::ReadOnly);
 
     //Чтение файла и преобразование его в контейнер
-    QJsonDocument doc = QJsonDocument().fromJson(file.readAll());
-    QJsonObject jsonObject = doc.object();
-    QJsonArray typeInfos = jsonObject.value("TypeInfos").toArray();
+    auto jsonDocument = QJsonDocument().fromJson(file.readAll()).object().value("TypeInfos").toArray();
 
     //Цикл поиска нужного значения и заполнение контейнера
-    for (auto typeInfo: typeInfos)
+    for (auto typeInfo: jsonDocument)
     {
         QJsonObject infoObject = typeInfo.toObject();
         if (infoObject.value("TypeName").toString() == inputValue)
         {
-            QMap<QString, QVariant> infoObjec1t = infoObject.value("Propertys").toVariant().toMap();
-            for(auto e : infoObjec1t.keys())
+            infoObject = infoObject.value("Propertys").toObject();
+            for(auto e : infoObject.keys())
             {
-                jsonContainer.insert(inputKey+"."+e, QString::number(offsetCounter));
-                offsetCounter+=offsetConvertToInt.value(infoObjec1t.value(e).toString());
+                jsonContainer.append(qMakePair(inputKey+"."+e, QString::number(offsetCounter)));
+                offsetCounter+=offsetConvertToInt.value(infoObject.value(e).toString());
             }
         }
     }
 }
 
 //Возврат размера контейнера
-int jsonProcessing::jsonGetSize(){
-    return jsonContainer.size();
+int jsonProcessing::jsonGetSize(){ return jsonContainer.size();
 }
 
 
 //Получение ключей
 QList<QString> jsonProcessing::jsonGetKey(){
-    return jsonContainer.keys();
+    QList <QString> keys;
+    for (auto a : jsonContainer){
+        keys.append(a.first);
+    }
+    return keys;
 }
 
 
@@ -87,21 +97,21 @@ void jsonProcessing::jsonInit(){
 
 //***XML***
 
-void getXML::exportXML(QMap<QString, QString> myDataList){
+void getXML::exportXML(QList<QPair<QString, QString>> myDataList){
     QFile file("output.xml");
     file.open(QIODevice::WriteOnly);
     QXmlStreamWriter XmlWriter(&file);
 
     XmlWriter.writeStartElement("root");
 
-    for(auto e : myDataList.keys()){
+    for(auto e : myDataList){
             XmlWriter.writeStartElement("item");
             XmlWriter.writeAttribute("Binding","Introduced");
             XmlWriter.writeStartElement("node-path");
-            XmlWriter.writeCharacters(e);
+            //XmlWriter.writeCharacters(e);
             XmlWriter.writeEndElement();
             XmlWriter.writeStartElement("address");
-            XmlWriter.writeCharacters(myDataList.value(e));
+            //XmlWriter.writeCharacters(myDataList.value(e));
             XmlWriter.writeEndElement();
             XmlWriter.writeEndElement();
         }

@@ -18,7 +18,7 @@ public:
     int csvGetSize(); //Функция вывода размера контейнера
     QList<QString> csvGetKey(); //Функция получения ключа из контейнера
     QString csvFindValue(QString); //Функция поиска значения в контейнере
-    QMap <QString, QString> csvContainer;
+    QList<QPair<QString, QString>> csvContainer;
 };
 
 class jsonProcessing
@@ -29,7 +29,7 @@ public:
     void jsonListAppend(QString, QString, int); //Добавление значений
     int jsonGetSize(); //Размер контейнера
     QList <QString> jsonGetKey(); //Получение ключа
-    QMap <QString, QString> jsonContainer;
+    QList<QPair<QString, QString>> jsonContainer;
 private:
     QMap<QString, int> offsetConvertToInt = { {"double", 8}, {"int", 4}, {"bool", 1} }; //Преобразование оффсета в число
     int offset=0; //Переменная для накопления оффсета
@@ -38,7 +38,7 @@ private:
 class getXML
 {
 public:
-    void exportXML(QMap<QString, QString> csvJsonList);
+    void exportXML(QList<QPair<QString, QString>> csvJsonList);
 };
 
 #endif // CSVREAD_H
